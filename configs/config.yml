@@ -1,0 +1,54 @@
+# port port
+port: :8091
+
+# Model mode debug | release
+# In the debug mode, you can output more detailed logs, but the running speed will slow down
+model: debug
+
+#  -------------------- log --------------------
+# comply with zap log specification
+log:
+  level: -1
+  development: false
+  sampling:
+    initial: 100
+    thereafter: 100
+  outputPath:
+    - stderr
+  errorOutputPath:
+    - stderr
+
+# -------------------- maxSize --------------------
+# maxSize limit the size of the uploaded file, default 30MB
+maxSize: 31457280
+
+
+# -------------------- mysql --------------------
+mysql:
+  host: 
+  db: 
+  user: 
+  password: 
+  log: true
+
+# -------------------- redis --------------------
+redis:
+  addrs:
+    - 
+    - 
+    -
+  username:
+  password:
+
+
+# -------------------- buckets --------------------   
+buckets:
+  readable: 
+  private: 
+
+
+# -------------------- blob ----------------------
+blob:
+  template: /blob/{{.AppID}}/{{.MD5}}/{{.FileName}}
+  # tempPath temporary decompression path, default program path
+  tempPath: /tmp/
