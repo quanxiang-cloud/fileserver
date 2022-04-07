@@ -169,6 +169,7 @@ func (g *Guide) DownloadFile(ctx context.Context, path string, w io.Writer) erro
 
 // DeleteFile delete file.
 func (g *Guide) DeleteFile(ctx context.Context, path string) error {
+	resp := &Resp{}
 	url := g.getRequestURL(deletePath)
 	err := client.POST(
 		ctx, g.client, url,
@@ -177,7 +178,7 @@ func (g *Guide) DeleteFile(ctx context.Context, path string) error {
 		}{
 			Path: filepath.Join(g.bucket, path),
 		},
-		nil,
+		resp,
 	)
 
 	return err
@@ -266,6 +267,8 @@ func (g *Guide) getPartUploadURL(ctx context.Context, partNumber int, partSize i
 }
 
 func (g *Guide) completeMultipart(ctx context.Context, path, uploadID string) error {
+	resp := &Resp{}
+
 	url := g.getRequestURL(completePath)
 	err := client.POST(
 		ctx, g.client, url,
@@ -276,13 +279,15 @@ func (g *Guide) completeMultipart(ctx context.Context, path, uploadID string) er
 			UploadID: uploadID,
 			Path:     path,
 		},
-		nil,
+		resp,
 	)
 
 	return err
 }
 
 func (g *Guide) finish(ctx context.Context, path string) error {
+	resp := &Resp{}
+
 	url := g.getRequestURL(finishPath)
 	err := client.POST(
 		ctx, g.client, url,
@@ -291,7 +296,7 @@ func (g *Guide) finish(ctx context.Context, path string) error {
 		}{
 			Path: path,
 		},
-		nil,
+		resp,
 	)
 	return err
 }
