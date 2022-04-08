@@ -2,6 +2,7 @@ package restful
 
 import (
 	"github.com/quanxiang-cloud/cabin/logger"
+	cabinGin "github.com/quanxiang-cloud/cabin/tailormade/gin"
 	"github.com/quanxiang-cloud/fileserver/pkg/misc/config"
 	"github.com/quanxiang-cloud/fileserver/pkg/probe"
 
@@ -70,7 +71,7 @@ func newRouter(c *config.Config) (*gin.Engine, error) {
 
 	gin.SetMode(c.Model)
 	engine := gin.New()
-	engine.Use(gin.Logger(), gin.Recovery())
+	engine.Use(cabinGin.LoggerFunc(), cabinGin.RecoveryFunc())
 
 	return engine, nil
 }
