@@ -36,9 +36,10 @@ const (
 
 // Guide Guide.
 type Guide struct {
-	endpoint string
-	bucket   string
-	client   *http.Client
+	endpoint   string
+	bucket     string
+	readBucket string
+	client     *http.Client
 }
 
 // NewGuide NewGuide.
@@ -57,13 +58,17 @@ func NewGuide() (*Guide, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	g.bucket = resp.Private
+	g.readBucket = resp.Readable
+
 	return g, nil
 }
 
 // Resp get return parameters.
 type Resp struct {
 	Private  string `json:"private"`
+	Readable string `json:"readable"`
 	URL      string `json:"url"`
 	UploadID string `json:"uploadID"`
 }
