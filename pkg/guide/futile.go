@@ -58,6 +58,7 @@ func (g *Guide) FutileUploadFile(ctx context.Context, path string, r io.Reader, 
 	return g.finish(ctx, path)
 }
 
+// FutileDownloadFile FutileDownloadFile.
 func (g *Guide) FutileDownloadFile(ctx context.Context, path string, w io.Writer, bkt bucket) error {
 	switch bkt {
 	case Private:
