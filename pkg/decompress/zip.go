@@ -163,6 +163,11 @@ func (z *ZipDecompress) createFile(rc io.ReadCloser, flag bool, fileName string)
 		flag = true
 	}
 
+	err := os.MkdirAll(filepath.Dir(fileName), fileMode)
+	if err != nil {
+		return false, err
+	}
+
 	w, err := os.Create(fileName)
 	if err != nil {
 		return flag, err
