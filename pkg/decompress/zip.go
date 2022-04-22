@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/quanxiang-cloud/fileserver/pkg/utils"
 )
@@ -52,8 +53,14 @@ func (z *ZipDecompress) Walk(file multipart.File) (string, error) {
 
 		if zipFile.FileInfo().IsDir() {
 			if !flag {
+				indexPrfix := fileName
+				arr := strings.Split(fileName, "/")
+				if len(arr) >= 2 {
+					indexPrfix = arr[0]
+				}
+
 				flag = true
-				indexHTML1, indexHTM2 := z.genIndex(fileName)
+				indexHTML1, indexHTM2 := z.genIndex(indexPrfix)
 				indexPathArr = append(indexPathArr, indexHTML1, indexHTM2)
 			}
 			continue
@@ -195,7 +202,7 @@ func (z *ZipDecompress) genIndex(dir string) (string, string) {
 		return indexHTML, indexHTM
 	}
 
-	return fmt.Sprintf("%s%s", dir, indexHTML), fmt.Sprintf("%s%s", dir, indexHTM)
+	return fmt.Sprintf("%s/%s", dir, indexHTML), fmt.Sprintf("%s/%s", dir, indexHTM)
 }
 
 // checkIndex checkIndex.
