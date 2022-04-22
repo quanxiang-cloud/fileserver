@@ -16,17 +16,17 @@ var (
 	prefixes = []string{"http://", "https://", "javascript:", "#"}
 )
 
-// Blob parsing structure
+// Blob parsing structure.
 type Blob struct {
 	AppID    string
 	MD5      string
 	FileName string
 }
 
-// ReplaceAttr replace label properties
+// ReplaceAttr replace label properties.
 func ReplaceAttr(blob Blob, blobTemplate, subFilePath, dst string) (*bytes.Buffer, error) {
 	// read file
-	file, err := os.Open(subFilePath) // nolint: gosec
+	file, err := os.Open(subFilePath) 
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +62,9 @@ func replacePath(subFilePath, val, dst string) string {
 	valArr := strings.Split(val, "/")
 	for _, val := range valArr {
 		index := strings.LastIndex(dir, "/")
+		if index == -1 {
+			index = 0
+		}
 		switch val {
 		case ".", "/":
 		case "..":
@@ -93,7 +96,7 @@ func skipPrefix(val string) bool {
 	return flag
 }
 
-// ExecuteURL ExecuteURL
+// ExecuteURL ExecuteURL.
 func ExecuteURL(blob Blob, url string) string {
 	var buf bytes.Buffer
 	t, _ := template.New("").Parse(url)
