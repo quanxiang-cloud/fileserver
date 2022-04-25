@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/quanxiang-cloud/cabin/tailormade/client"
+	"github.com/quanxiang-cloud/fileserver/pkg/mime"
 )
 
 type bucket int
@@ -47,7 +48,7 @@ func (g *Guide) FutileUploadFile(ctx context.Context, path string, r io.Reader, 
 		return err
 	}
 	request.ContentLength = size
-	request.Header.Set(contentTypeKey, contentType)
+	request.Header.Set(contentTypeKey, mime.DetectFilePath(path))
 
 	response, err := g.client.Do(request)
 	if err != nil {
