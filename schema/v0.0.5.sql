@@ -1,4 +1,4 @@
-CREATE TABLE `fileserver`.`file_info`  (
+CREATE TABLE `fileserver`.`fileserver`  (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ID',
   `file_md5` varchar(128) CHARACTER SET  COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '文件唯一md5值',
   `upload_name` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '上传至oss的文件名',
