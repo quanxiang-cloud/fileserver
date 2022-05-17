@@ -73,7 +73,7 @@ func (g *Guide) FutileDownloadFile(ctx context.Context, path string, w io.Writer
 	resp := &Resp{}
 	url := g.getRequestURL(downloadPath)
 	err := client.POST(
-		ctx, g.client, url,
+		ctx, &g.client, url,
 		struct {
 			Path string `json:"path"`
 		}{

@@ -36,30 +36,34 @@ const (
 )
 
 const (
-	defaultTimeout = 20 * time.Second
-	maxIdleConns   = 10
+	defaultTimeout      = 20 * time.Second
+	defaultmaxIdleConns = 10
 )
 
 // Guide Guide.
 type Guide struct {
-	endpoint   string
-	bucket     string
-	readBucket string
-	client     *http.Client
+	endpoint     string
+	bucket       string
+	readBucket   string
+	timeout      time.Duration
+	maxIdleConns int
+	client       http.Client
 }
 
 // Option option.
 type Option func(*Guide)
 
-// WithHTTPClient WithHTTPClient.
-func WithHTTPClient(timeout time.Duration, maxIdleConns int) Option {
+// WithTimeout set timeout.
+func WithTimeout(timeout time.Duration) Option {
 	return func(g *Guide) {
-		cli := client.New(client.Config{
-			Timeout:      timeout,
-			MaxIdleConns: maxIdleConns,
-		})
+		g.timeout = timeout
+	}
+}
 
-		g.client = &cli
+// WithMaxIdleConns set max idle conns.
+func WithMaxIdleConns(maxIdleConns int) Option {
+	return func(g *Guide) {
+		g.maxIdleConns = maxIdleConns
 	}
 }
 
@@ -70,14 +74,10 @@ func NewGuide(opts ...Option) (*Guide, error) {
 		endpoint = "http://fileserver"
 	}
 
-	cli := client.New(client.Config{
-		Timeout:      defaultTimeout,
-		MaxIdleConns: maxIdleConns,
-	})
-
 	g := &Guide{
-		endpoint: endpoint,
-		client:   &cli,
+		endpoint:     endpoint,
+		timeout:      defaultTimeout,
+		maxIdleConns: defaultmaxIdleConns,
 	}
 
 	for _, opt := range opts {
@@ -91,6 +91,10 @@ func NewGuide(opts ...Option) (*Guide, error) {
 
 	g.bucket = resp.Private
 	g.readBucket = resp.Readable
+	g.client = client.New(client.Config{
+		Timeout:      g.timeout,
+		MaxIdleConns: g.maxIdleConns,
+	})
 
 	return g, nil
 }
@@ -179,7 +183,7 @@ func (g *Guide) DownloadFile(ctx context.Context, path string, w io.Writer) erro
 	resp := &Resp{}
 	url := g.getRequestURL(downloadPath)
 	err := client.POST(
-		ctx, g.client, url,
+		ctx, &g.client, url,
 		struct {
 			Path string `json:"path"`
 		}{
@@ -207,7 +211,7 @@ func (g *Guide) DeleteFile(ctx context.Context, path string) error {
 	resp := &Resp{}
 	url := g.getRequestURL(deletePath)
 	err := client.POST(
-		ctx, g.client, url,
+		ctx, &g.client, url,
 		struct {
 			Path string `json:"path"`
 		}{
@@ -223,7 +227,7 @@ func (g *Guide) getBucket() (*Resp, error) {
 	resp := &Resp{}
 	url := g.getRequestURL(domainPath)
 	err := client.POST(
-		context.Background(), g.client, url,
+		context.Background(), &g.client, url,
 		nil,
 		resp,
 	)
@@ -236,7 +240,7 @@ func (g *Guide) getUploadURL(ctx context.Context, path string) (*Resp, error) {
 
 	url := g.getRequestURL(uploadPath)
 	err := client.POST(
-		ctx, g.client, url,
+		ctx, &g.client, url,
 		struct {
 			Path string `json:"path"`
 		}{
@@ -256,7 +260,7 @@ func (g *Guide) getUploadID(ctx context.Context, path string) (*Resp, error) {
 
 	url := g.getRequestURL(initMultipartPath)
 	err := client.POST(
-		ctx, g.client, url,
+		ctx, &g.client, url,
 		struct {
 			Path        string `json:"path"`
 			ContentType string `json:"contentType"`
@@ -285,7 +289,7 @@ func (g *Guide) getPartUploadURL(ctx context.Context, partNumber int, partSize i
 
 	url := g.getRequestURL(uploadPartPath)
 	err := client.POST(
-		ctx, g.client, url,
+		ctx, &g.client, url,
 		struct {
 			UploadID   string `json:"uploadID"`
 			PartNumber int    `json:"partNumber"`
@@ -306,7 +310,7 @@ func (g *Guide) completeMultipart(ctx context.Context, path, uploadID string) er
 
 	url := g.getRequestURL(completePath)
 	err := client.POST(
-		ctx, g.client, url,
+		ctx, &g.client, url,
 		struct {
 			UploadID string `json:"uploadID"`
 			Path     string `json:"path"`
@@ -325,7 +329,7 @@ func (g *Guide) finish(ctx context.Context, path string) error {
 
 	url := g.getRequestURL(finishPath)
 	err := client.POST(
-		ctx, g.client, url,
+		ctx, &g.client, url,
 		struct {
 			Path string `json:"path"`
 		}{
