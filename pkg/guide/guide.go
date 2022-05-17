@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/quanxiang-cloud/cabin/tailormade/client"
 )
@@ -34,6 +35,11 @@ const (
 	byteSize     = 5 * 1024 * 1024 // 5MB
 )
 
+const (
+	defaultTimeout = 20 * time.Second
+	maxIdleConns   = 10
+)
+
 // Guide Guide.
 type Guide struct {
 	endpoint   string
@@ -42,16 +48,40 @@ type Guide struct {
 	client     *http.Client
 }
 
+// Option option.
+type Option func(*Guide)
+
+// WithHTTPClient WithHTTPClient.
+func WithHTTPClient(timeout time.Duration, maxIdleConns int) Option {
+	return func(g *Guide) {
+		cli := client.New(client.Config{
+			Timeout:      timeout,
+			MaxIdleConns: maxIdleConns,
+		})
+
+		g.client = &cli
+	}
+}
+
 // NewGuide NewGuide.
-func NewGuide() (*Guide, error) {
+func NewGuide(opts ...Option) (*Guide, error) {
 	endpoint := os.Getenv("FILESERVER_ENDPOINT")
 	if endpoint == "" {
 		endpoint = "http://fileserver"
 	}
 
+	cli := client.New(client.Config{
+		Timeout:      defaultTimeout,
+		MaxIdleConns: maxIdleConns,
+	})
+
 	g := &Guide{
 		endpoint: endpoint,
-		client:   http.DefaultClient,
+		client:   &cli,
+	}
+
+	for _, opt := range opts {
+		opt(g)
 	}
 
 	resp, err := g.getBucket()
