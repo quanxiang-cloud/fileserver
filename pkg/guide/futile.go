@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"path/filepath"
+	"strings"
 
 	"github.com/quanxiang-cloud/cabin/tailormade/client"
 	"github.com/quanxiang-cloud/fileserver/pkg/mime"
@@ -94,4 +96,34 @@ func (g *Guide) FutileDownloadFile(ctx context.Context, path string, w io.Writer
 	buf := make([]byte, byteSize)
 	_, err = io.CopyBuffer(w, response.Body, buf)
 	return err
+}
+
+// AttachmentDownload AttachmentDownload.
+func (g *Guide) AttachmentDownload(ctx context.Context, rawURL string, w io.Writer) error {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return err
+	}
+
+	// Not an internal link
+	if !strings.HasSuffix(u.Host, g.domain) {
+		r, err := http.Get(rawURL)
+		if err != nil {
+			return err
+		}
+		defer r.Body.Close()
+
+		buf := make([]byte, byteSize)
+		_, err = io.CopyBuffer(w, r.Body, buf)
+
+		return err
+	}
+
+	// Internal link Download
+	path := strings.TrimPrefix(u.Path, "/")
+	if strings.HasPrefix(u.Host, g.bucket) {
+		return g.FutileDownloadFile(ctx, path, w, Private)
+	}
+
+	return g.FutileDownloadFile(ctx, path, w, Readable)
 }

@@ -42,6 +42,7 @@ const (
 
 // Guide Guide.
 type Guide struct {
+	domain       string
 	endpoint     string
 	bucket       string
 	readBucket   string
@@ -73,7 +74,6 @@ func NewGuide(opts ...Option) (*Guide, error) {
 	if endpoint == "" {
 		endpoint = "http://fileserver"
 	}
-
 	g := &Guide{
 		endpoint:     endpoint,
 		timeout:      defaultTimeout,
@@ -89,6 +89,7 @@ func NewGuide(opts ...Option) (*Guide, error) {
 		return nil, err
 	}
 
+	g.domain = resp.Domain
 	g.bucket = resp.Private
 	g.readBucket = resp.Readable
 	g.client = client.New(client.Config{
@@ -101,6 +102,7 @@ func NewGuide(opts ...Option) (*Guide, error) {
 
 // Resp get return parameters.
 type Resp struct {
+	Domain   string `json:"domain"`
 	Private  string `json:"private"`
 	Readable string `json:"readable"`
 	URL      string `json:"url"`
